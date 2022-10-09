@@ -4,7 +4,7 @@ mod process;
 
 use crate::cli::Cli;
 use crate::config::{Config, RateType, DEFAULT_CONFIG};
-use crate::process::{Cal, Interest, Principal, Repays};
+use crate::process::{Interest, Principal, Repays};
 use clap::Parser;
 use std::fs::File;
 use std::io::{Read, Write};

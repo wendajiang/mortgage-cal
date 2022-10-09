@@ -107,7 +107,7 @@ impl<'a> Cal for Principal<'a> {
 
             total_in = total_in + f_repay_i + b_repay_i;
 
-            already_repay_f_p = already_repay_f_p + fund_every_month;
+            already_repay_f_p += fund_every_month;
             already_repay_b_p =
                 already_repay_b_p + business_every_month + self.policy.0.get(&(i + 1)).unwrap();
             println!(
