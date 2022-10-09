@@ -38,9 +38,16 @@ fn main() {
                     .expect("error");
             }
         } else {
+            let policy = Repays::new("./policy.csv").unwrap();
             match config.rate.ty {
-                RateType::Interest => process::mortgage_process(Interest { config: &config }),
-                RateType::Principal => process::mortgage_process(Principal { config: &config }),
+                RateType::Interest => process::mortgage_process(Interest {
+                    config: &config,
+                    policy: &policy,
+                }),
+                RateType::Principal => process::mortgage_process(Principal {
+                    config: &config,
+                    policy: &policy,
+                }),
             };
         }
     } else {
