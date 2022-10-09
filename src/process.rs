@@ -21,7 +21,7 @@ where
 }
 
 #[derive(Debug)]
-pub struct Repays(HashMap<u32, Decimal>);
+pub struct Repays(HashMap<u64, Decimal>);
 
 // The output is wrapped in a Result to allow matching on errors
 // Returns an Iterator to the Reader of the lines of the file.
@@ -50,7 +50,7 @@ impl Repays {
                             .map(|x| x.trim_start().trim_end())
                             .collect();
                         let month = res[0].parse().unwrap();
-                        let repay = Decimal::from_str(res[1]).unwrap();
+                        let repay = Decimal::from_str(res[1]).unwrap() * dec!(10000);
                         if month < 12 && repay > Decimal::ZERO {
                             panic!("forbid first year repay");
                         }
@@ -94,16 +94,22 @@ impl<'a> Cal for Principal<'a> {
                 + Decimal::from(time + 1) * fund * fund_rate / dec!(2)
         );
         let mut total_in = Decimal::ZERO;
+
+        let mut already_repay_f_p = Decimal::ZERO;
+        let mut already_repay_b_p = Decimal::ZERO;
+
         for i in 0..time {
-            let already_repay_f_p = fund_every_month * Decimal::from(i);
             let f_repay = fund_every_month + (fund - already_repay_f_p) * fund_rate;
             let f_repay_i = (fund - already_repay_f_p) * fund_rate;
 
-            let already_repay_b_p = business_every_month * Decimal::from(i);
             let b_repay = business_every_month + (business - already_repay_b_p) * business_rate;
             let b_repay_i = (business - already_repay_b_p) * business_rate;
 
             total_in = total_in + f_repay_i + b_repay_i;
+
+            already_repay_f_p = already_repay_f_p + fund_every_month;
+            already_repay_b_p =
+                already_repay_b_p + business_every_month + self.policy.0.get(&(i + 1)).unwrap();
             println!(
                 "{}月\n公积金 本金{:.2} 利息{:.2} 总计:{:.2}\n商贷 本金{:.2} 利息{:.2} 总计:{:.2}\n总计 本金{:.2} 利息{:.2} 总计:{:.2}",
                 i + 1,
