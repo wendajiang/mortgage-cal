@@ -77,8 +77,8 @@ pub struct Principal<'a> {
 // https://www.cnblogs.com/lhws/archive/2013/04/12/3017246.html
 impl<'a> Cal for Principal<'a> {
     fn process(&self) {
-        println!("等额本金");
         let time = self.config.loan.time as u64;
+        println!("等额本金 总共{}月", time);
         let fund = self.config.loan.fund * dec!(10000);
         let fund_rate = self.config.rate.fund / dec!(100) / dec!(12);
         let business = self.config.loan.business * dec!(10000);
@@ -86,6 +86,18 @@ impl<'a> Cal for Principal<'a> {
 
         let fund_every_month = fund / Decimal::from(time);
         let business_every_month = business / Decimal::from(time);
+
+        println!(
+            "商贷总额:{:.2} 利率:{:.4} 总利息:{:.2} \n公积金总额:{:.2} 利率:{:.4} 总利息:{:.2}\n 总利息:{:.2}",
+            business,
+            business_rate,
+            Decimal::from(time + 1) * business * business_rate / dec!(2),
+            fund,
+            fund_rate,
+            Decimal::from(time + 1) * fund * fund_rate / dec!(2),
+            Decimal::from(time + 1) * business * business_rate / dec!(2)
+                + Decimal::from(time + 1) * fund * fund_rate / dec!(2)
+        );
 
         for i in 0..time {
             let already_repay_f_p = fund_every_month * Decimal::from(i);
@@ -116,8 +128,8 @@ fn interest_cal(number: Decimal, rate: Decimal, time: u64) -> Decimal {
 // https://zhuanlan.zhihu.com/p/390581715
 impl<'a> Cal for Interest<'a> {
     fn process(&self) {
-        println!("等额本息");
         let time = self.config.loan.time as u64;
+        println!("等额本息 总共{}月", time);
 
         let fund = self.config.loan.fund * dec!(10000);
         let fund_rate = self.config.rate.fund / dec!(100) / dec!(12);
@@ -127,6 +139,18 @@ impl<'a> Cal for Interest<'a> {
         let business_rate = self.config.rate.business / dec!(100) / dec!(12);
         let business_month = interest_cal(business, business_rate, time);
         let total_month = fund_month + business_month;
+        println!(
+            "商贷总额:{:.2} 利率:{:.4} 总利息:{:.2} \n公积金总额:{:.2} 利率:{:.4} 总利息:{:.2}\n 总利息:{:.2}",
+            business,
+            business_rate,
+            business_month * Decimal::from(time) - business,
+            fund,
+            fund_rate,
+            fund_month * Decimal::from(time) - fund,
+            business_month * Decimal::from(time) - business + fund_month * Decimal::from(time)
+                - fund
+        );
+
         println!(
             "every month fund:{:.2} business:{:.2} total:{:.2}",
             fund_month, business_month, total_month,
@@ -151,7 +175,5 @@ impl<'a> Cal for Interest<'a> {
                 f_i, b_p, b_i, f_p + b_p, f_i + b_i,
             );
         }
-
-        println!("total interest: {}", total_interest);
     }
 }
