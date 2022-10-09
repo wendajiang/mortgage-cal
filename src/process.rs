@@ -77,11 +77,31 @@ pub struct Principal<'a> {
 // https://www.cnblogs.com/lhws/archive/2013/04/12/3017246.html
 impl<'a> Cal for Principal<'a> {
     fn process(&self) {
-        // let fund = self.config.loan.fund * dec!(10000);
-        // let fund_rate = self.config.rate.fund / dec!(100) / dec!(12);
-        //
-        // let business = self.config.loan.business * dec!(10000);
-        // let business_rate = self.config.rate.business / dec!(100) / dec!(12);
+        println!("等额本金");
+        let time = self.config.loan.time as u64;
+        let fund = self.config.loan.fund * dec!(10000);
+        let fund_rate = self.config.rate.fund / dec!(100) / dec!(12);
+        let business = self.config.loan.business * dec!(10000);
+        let business_rate = self.config.rate.business / dec!(100) / dec!(12);
+
+        let fund_every_month = fund / Decimal::from(time);
+        let business_every_month = business / Decimal::from(time);
+
+        for i in 0..time {
+            let already_repay_f_p = fund_every_month * Decimal::from(i);
+            let f_repay = fund_every_month + (fund - already_repay_f_p) * fund_rate;
+            let f_repay_i = (fund - already_repay_f_p) * fund_rate;
+
+            let already_repay_b_p = business_every_month * Decimal::from(i);
+            let b_repay = business_every_month + (business - already_repay_b_p) * business_rate;
+            let b_repay_i = (business - already_repay_b_p) * business_rate;
+            println!(
+                "{}月\n公积金 本金{:.2} 利息{:.2} 总计:{:.2}\n商贷 本金{:.2} 利息{:.2} 总计:{:.2}\n总计 本金{:.2} 利息{:.2} 总计:{:.2}",
+                i + 1,
+                fund_every_month,
+                f_repay_i, f_repay, business_every_month, b_repay_i, b_repay, fund_every_month + business_every_month, f_repay_i + b_repay_i, f_repay + b_repay,
+            );
+        }
     }
 }
 
