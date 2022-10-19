@@ -108,8 +108,14 @@ impl<'a> Cal for Principal<'a> {
             total_in = total_in + f_repay_i + b_repay_i;
 
             already_repay_f_p += fund_every_month;
-            already_repay_b_p =
-                already_repay_b_p + business_every_month + self.policy.0.get(&(i + 1)).unwrap();
+            already_repay_b_p = already_repay_b_p
+                + business_every_month
+                + if let Some(repay) = self.policy.0.get(&(i + 1)) {
+                    repay
+                } else {
+                    println!("warning {} month repay parse failed", i + 1);
+                    &Decimal::ZERO
+                };
             println!(
                 "{}月\n公积金 本金{:.2} 利息{:.2} 总计:{:.2}\n商贷 本金{:.2} 利息{:.2} 总计:{:.2}\n总计 本金{:.2} 利息{:.2} 总计:{:.2}",
                 i + 1,
